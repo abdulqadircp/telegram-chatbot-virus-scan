@@ -2,6 +2,7 @@ import os
 import requests
 import telebot
 import uuid
+import time
 from helpers import get_report, get_content_from_str_dict
 
 
@@ -43,9 +44,8 @@ def handle_file(message):
                       "X-Apikey": KEY_VIRUSTOTAL}
 
             response = requests.post(url, files=files, headers=headers)
-            print("response .json >>> ", response.json())
-            report_link = response.json()["data"]["links"]["self"]
-            print("report_link >>> ",report_link)
+
+            report_link = response.json()["data"]["links"]["self"
             time.sleep(5)
             report= get_report(report_link)
 
