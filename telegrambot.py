@@ -3,14 +3,25 @@ import requests
 import telebot
 import uuid
 import time
-from helpers import get_file_report, get_content_from_str_dict, write_text_file, send_file_to_group, get_url_scan_report
+from helpers import get_file_report, get_content_from_str_dict, write_text_file, get_url_scan_report
+from dotenv import load_dotenv, dotenv_values
+# loading variables from .env file
+load_dotenv()
 
-
+SCAN_REPORTS_DIR = "scan_reports"
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 KEY_VIRUSTOTAL = os.getenv("KEY_VIRUSTOTAL")
 BASE_URL = "https://api.telegram.org/bot"
 # You can set parse_mode by default. HTML or MARKDOWN
 bot = telebot.TeleBot(TELEGRAM_TOKEN, parse_mode=None)
+
+
+
+
+def send_file_to_group(file_path,message):
+  with open(file_path, 'rb') as file:
+    bot.send_document(message.chat.id,file)
+
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
@@ -20,7 +31,7 @@ def send_welcome(message):
 @bot.message_handler(content_types= ['document', 'photo', 'audio', 'video', 'voice'])
 def handle_files(message):
   if message.caption:
-        
+
         if message.caption.startswith('/scan_file'):
             content_type = get_content_from_str_dict(message=message,substring="content_type")
             file_id = get_content_from_str_dict(message=message,substring="file_id")
@@ -32,10 +43,11 @@ def handle_files(message):
             get_file_api_url =  f'{BASE_URL}{TELEGRAM_TOKEN}/{file_path["result"]["file_path"]}'
             file  = requests.get(get_file_api_url)
 
-            api_url = "https://www.virustotal.com/api/v3/files"            
+            api_url = "https://www.virustotal.com/api/v3/files"
             time.sleep(5)
             report = get_file_report(file=file,api_url=api_url)
-            file_path = f"scan_report_{content_type}_{str(uuid.uuid4())}.txt"
+            file_name = f"scan_report_{content_type}_{str(uuid.uuid4())}.txt"
+            file_path = os.path.join(SCAN_REPORTS_DIR,file_name)
             write_text_file(file_path=file_path,data=report)
             send_file_to_group(file_path=file_path,message=message)
             bot.reply_to(message,f"{content_type} has scanned successfull")
@@ -51,12 +63,13 @@ def handle_files(message):
 @bot.message_handler(content_types= ['text'])
 def handle_files(message):
     if "scan_url :" in  message.text:
-        
-            url = message.text.strip().split("scan_url :")[1] 
+
+            url = message.text.strip().split("scan_url :")[1]
             bot.reply_to(message, f"URL {url} received for scanning!")
             api_url = "https://www.virustotal.com/api/v3/urls"
             report = get_url_scan_report(api_url=api_url,url=url)
-            file_path = f"scan_report_url_{str(uuid.uuid4())}.txt"
+            file_name = f"scan_report_url_{str(uuid.uuid4())}.txt"
+            file_path = os.path.join(SCAN_REPORTS_DIR,file_name)
             write_text_file(file_path=file_path,data=report)
             send_file_to_group(file_path=file_path,message=message)
             bot.reply_to(message,f"URL has scanned successfull")

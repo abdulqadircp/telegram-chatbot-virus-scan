@@ -4,7 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pytelegrambotapi = "*"
+pytelegrambotapi = {git = "git+https://github.com/eternnoir/pyTelegramBotAPI.git"}
+python-dotenv = "2023.12.1"
 
 [dev-packages]
 

@@ -1,3 +1,14 @@
+import requests
+import time
+import os
+from dotenv import load_dotenv, dotenv_values
+# loading variables from .env file
+load_dotenv()
+
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+KEY_VIRUSTOTAL = os.getenv("KEY_VIRUSTOTAL")
+
+
 def check_report_status(report_link,headers):
   response = requests.get(report_link, headers=headers)
   flag = True
@@ -10,7 +21,7 @@ def check_report_status(report_link,headers):
     if counter == 10:
       flag = False
       break
-  return flag , str(json_data)  
+  return flag , str(json_data)
 
 
 
@@ -29,9 +40,9 @@ def get_file_report(file ,api_url=None):
 
   response = requests.post(api_url, files=files, headers=headers)
   report_link = response.json()["data"]["links"]["self"]
-  
-  flag, data = check_report_status(report_link,headers) 
-  
+
+  flag, data = check_report_status(report_link,headers)
+
 
   if flag:
     result = data
@@ -40,13 +51,32 @@ def get_file_report(file ,api_url=None):
   return result
 
 
+def get_url_scan_report(api_url ,url):
+    payload = { "url": url }
+    headers = {
+        "accept": "application/json",
+        "x-apikey": KEY_VIRUSTOTAL,
+        "content-type": "application/x-www-form-urlencoded"
+    }
+
+    response = requests.post(api_url, data=payload, headers=headers)
+    report_link = response.json()["data"]["links"]["self"]
+    flag = check_report_status(report_link,headers)
+
+    flag, data = check_report_status(report_link,headers)
+
+
+    if flag:
+      result = data
+    else:
+      result = "Failed To Generate The Scan Report [!]"
+    return result
+
 
 def write_text_file(file_path,data):
   with open(file_path, "w") as text_file:
     text_file.write(data)
 
-            
 
-def send_file_to_group(file_path,message):
-  with open(file_path, 'rb') as file:
-    bot.send_document(message.chat.id,file)
+
+
