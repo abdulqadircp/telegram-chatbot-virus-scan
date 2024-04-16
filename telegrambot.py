@@ -44,7 +44,8 @@ def handle_file(message):
                       "X-Apikey": KEY_VIRUSTOTAL}
 
             response = requests.post(url, files=files, headers=headers)
-            report_link = response.json()["data"]["links"]["self"]
+
+            report_link = response.json()["data"]["links"]["self"
             time.sleep(5)
             report= get_report(report_link)
 
