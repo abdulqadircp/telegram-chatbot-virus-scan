@@ -1,15 +1,4 @@
-def get_content_from_str_dict(message=None,substring="file_id"):
-  message = str(message)
-  index = message.find(substring)
-  result = message[index:].split(",")[0].split(":")[1].replace("'","").strip()
-  return result
-
-
-def get_report(report_link=None):
-  headers = {"accept": "application/json",
-            "X-Apikey": KEY_VIRUSTOTAL}
-
-  
+def check_report_status(report_link,headers):
   response = requests.get(report_link, headers=headers)
   flag = True
   counter = 0
@@ -21,9 +10,43 @@ def get_report(report_link=None):
     if counter == 10:
       flag = False
       break
+  return flag , str(json_data)  
+
+
+
+
+def get_content_from_str_dict(message=None,substring="file_id"):
+  message = str(message)
+  index = message.find(substring)
+  result = message[index:].split(",")[0].split(":")[1].replace("'","").strip()
+  return result
+
+
+def get_file_report(file ,api_url=None):
+  files = { "file": file.content}
+  headers = {"accept": "application/json",
+            "X-Apikey": KEY_VIRUSTOTAL}
+
+  response = requests.post(api_url, files=files, headers=headers)
+  report_link = response.json()["data"]["links"]["self"]
+  
+  flag, data = check_report_status(report_link,headers) 
+  
 
   if flag:
-    result = response.text
+    result = data
   else:
-    result = "Failed To Generate The Scan Report [!]"  
+    result = "Failed To Generate The Scan Report [!]"
   return result
+
+
+
+def write_text_file(file_path,data):
+  with open(file_path, "w") as text_file:
+    text_file.write(data)
+
+            
+
+def send_file_to_group(file_path,message):
+  with open(file_path, 'rb') as file:
+    bot.send_document(message.chat.id,file)
