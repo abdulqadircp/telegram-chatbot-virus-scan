@@ -4,7 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pytelegrambotapi = "*"
+pytelegrambotapi = {git = "git+https://github.com/eternnoir/pyTelegramBotAPI.git"}
+matplotlib = "*"
+pandas = "*"
 
 [dev-packages]
 
