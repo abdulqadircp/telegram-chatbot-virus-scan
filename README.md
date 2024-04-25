@@ -13,6 +13,10 @@ Welcome to our project! This repository contains a tool for scanning files, URLs
 
 4. **Request Type Stats**: To retrieve statistics about request types, use the command `request_type_stats:`.
 
+
+
+
+
 ## How to Use
 
 1. Clone the repository to your local machine:
@@ -20,21 +24,22 @@ Welcome to our project! This repository contains a tool for scanning files, URLs
 ```bash
 https://github.com/abdulqadircp/telegram-chatbot-virus-scan.git
 
+```
 
-
-### Python Environment Setup
+ ## Python Environment Setup
 
 1. Install Pipenv if you haven't already:
 
 ```bash
 pip install pipenv
-
+```
 2. Install dependencies using Pipenv:
 
 ```bash
 pipenv install
-
+```
 3. Activate the virtual environment:
 
 ```bash
 pipenv shell
+```
