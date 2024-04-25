@@ -20,19 +20,21 @@ Welcome to our project! This repository contains a tool for scanning files, URLs
 ```bash
 https://github.com/abdulqadircp/telegram-chatbot-virus-scan.git
 
-## Python Environment Setup
 
-2. Install Pipenv if you haven't already:
+
+### Python Environment Setup
+
+1. Install Pipenv if you haven't already:
 
 ```bash
 pip install pipenv
 
-3. Install dependencies using Pipenv:
+2. Install dependencies using Pipenv:
 
 ```bash
 pipenv install
 
-4. Activate the virtual environment:
+3. Activate the virtual environment:
 
 ```bash
 pipenv shell
