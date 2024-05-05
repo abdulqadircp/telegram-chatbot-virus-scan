@@ -3,6 +3,7 @@ import time
 import os
 import pandas as pd
 import json
+import re
 from dotenv import load_dotenv, dotenv_values
 # loading variables from .env file
 load_dotenv()
@@ -16,7 +17,6 @@ def check_report_status(report_link, headers):
     flag = True
     counter = 0
     json_data = requests.get(report_link, headers=headers).json()
-    print("json_data >> ", json_data)
     while json_data["data"]["attributes"]["status"] == "queued":
         counter += 1
         time.sleep(5)
@@ -37,13 +37,9 @@ def get_content_from_str_dict(message=None, substring="file_id"):
 
 
 def get_relevant_data_from_api_response(data, result="results"):
-    # get_relevant_data_from_api_response for File and URL api response
-    print("data >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>######################################################>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \n", type(data), " ", data)
     merged_dict = {}
     for key in data["data"]["attributes"][result].keys():
         anti_virus = data["data"]["attributes"][result][key]
-        # dicts = [dict1, dict2, dict3]
-
         # Merge dictionaries
         for key, value in anti_virus.items():
             if key not in merged_dict:
@@ -109,9 +105,40 @@ def get_ip_scan_report(api_url):
 
 
 def write_csv_file(file_path, data):
-    # data =json.loads(data)
-
     df = pd.DataFrame(data)
     df.to_csv(file_path, index=False)
-    # with open(file_path, "w") as text_file:
-    #     text_file.write(data)
+
+
+def count_words(df, column_name, words):
+    detection_count = 0
+    for word in words:
+        detection_count += df[column_name].str.contains(word, case=False).sum()
+    return detection_count
+
+
+def is_valid_ip(ip):
+    # Regular expression pattern for IPv4 address
+    ipv4_pattern = r'^(\d{1,3}\.){3}\d{1,3}$'
+
+    # Regular expression pattern for IPv6 address
+    ipv6_pattern = r'^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$'
+
+    # Check if the string matches either IPv4 or IPv6 pattern
+    if re.match(ipv4_pattern, ip):
+        return True, "IPv4"
+    elif re.match(ipv6_pattern, ip):
+        return True, "IPv6"
+    else:
+        return False, None
+
+
+def is_valid_url(url):
+    regex = re.compile(
+        r'(?:(?:https?://)?'  # optional scheme
+        r'(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+'  # domain...
+        r'(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+    return re.match(regex, url) is not None
