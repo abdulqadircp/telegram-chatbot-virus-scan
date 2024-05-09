@@ -116,25 +116,45 @@ def send_file_to_group(file_path, message, message_id):
                           reply_to_message_id=message_id)
 
 
-@bot.message_handler(commands=['start'])
-def send_welcome(message):
+@bot.message_handler(commands=['start', 'help'])
+def send_options(message):
     options_message = f"1) To Scan The File  Type /scan_file  And Upload The File \n 2) To Scan The Link Type /scan_url   And Type The URL \n 3) To Scan The IP Type /scan_ip   And Type The IP  \n 4) To Get stats Type /request_type_stats  "
     welcome_message = f"Hello {message.from_user.first_name} How can I protect you? \n"
-    bot.send_message(message.chat.id, welcome_message + options_message)
+
+    keyboard = telebot.types.InlineKeyboardMarkup()
+
+    keyboard.row(
+        telebot.types.InlineKeyboardButton(
+            'Scan File', callback_data='scan_file'),
+        telebot.types.InlineKeyboardButton(
+            'Scan URL', callback_data='scan_url'),
+        telebot.types.InlineKeyboardButton('Scan IP', callback_data='scan_ip'),
+
+        # telebot.types.InlineKeyboardButton('RUR', callback_data='get-RUR')
+    )
+    keyboard.row(telebot.types.InlineKeyboardButton(
+        'Get Request Type Stats', callback_data='get_stats'),)
+    bot.send_message(message.chat.id, welcome_message +
+                     options_message, reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def iq_callback(query):
+    data = query.data
+    if data == "scan_file":
+        file_scan_request(query.message)
+    if data == "scan_url":
+        url_scan_request(query.message)
+    if data == "scan_ip":
+        ip_scan_request(query.message)
+    if data == "get_stats":
+        get_request_type_stats(query.message)
 
 
 def invalid_input_message(message):
     bot.send_message(
         message.chat.id, "You Input The Invalid Value \nTo See Options Use /help ")
 
-
-@bot.message_handler(commands=['help'])
-def send_options(message):
-    options_message = f"1) To Scan The File  Type /scan_file  And Upload The File \n 2) To Scan The Link Type /scan_url   And Type The URL \n 3) To Scan The IP Type /scan_ip   And Type The IP  \n 4) To Get stats Type /request_type_stats  "
-    bot.send_message(message.chat.id, options_message)
-
-
-# bot.register_next_step_handler(message , start_step3)
 
 @bot.message_handler(commands=['scan_file'], content_types=['text'])
 def file_scan_request(message):
@@ -244,7 +264,7 @@ def handle_url(message):
 
 
 @bot.message_handler(commands=['request_type_stats'], content_types=['text'])
-def url_scan_request(message):
+def get_request_type_stats(message):
     bot.reply_to(message, f"request for the stats has recieved.")
     create_graph(message.chat.id, message.message_id,
                  user_id=message.from_user.id)
