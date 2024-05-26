@@ -1,0 +1,7 @@
+CREATE TABLE `Requests` (
+  `RequestID` int NOT NULL AUTO_INCREMENT,
+  `UserID` bigint DEFAULT NULL,
+  `RequestTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `RequestType` enum('File','IP','URL') DEFAULT NULL,
+  PRIMARY KEY (`RequestID`)
+)

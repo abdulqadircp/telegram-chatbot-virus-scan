@@ -66,12 +66,13 @@ def create_graph(chat_id, message_id, user_id):
     for row in results:
         request_types.append(row[0])
         request_counts.append(row[1])
-
+    print("request_types >> ", request_types)
+    print("request_count >> ", request_counts)
     # Create a bar chart
     plt.bar(request_types, request_counts, color='blue')
     plt.xlabel('Request Type')
     plt.ylabel('Request Count')
-    plt.title('Request Types Distribution')
+    plt.title('Request Types Stats')
     plt.tight_layout()  # Adjust layout to prevent clipping of labels
     # Save the graph image
     plt.savefig('request_types_distribution.png')
@@ -130,10 +131,9 @@ def send_options(message):
             'Scan URL', callback_data='scan_url'),
         telebot.types.InlineKeyboardButton('Scan IP', callback_data='scan_ip'),
 
-        # telebot.types.InlineKeyboardButton('RUR', callback_data='get-RUR')
     )
     keyboard.row(telebot.types.InlineKeyboardButton(
-        'Get Request Type Stats', callback_data='get_stats'),)
+        'Get Request Type Stats', callback_data='get_stats'))
     bot.send_message(message.chat.id, welcome_message +
                      options_message, reply_markup=keyboard)
 
@@ -148,7 +148,8 @@ def iq_callback(query):
     if data == "scan_ip":
         ip_scan_request(query.message)
     if data == "get_stats":
-        get_request_type_stats(query.message)
+        print("user_id = query.from_user.id >>", query.from_user.id)
+        get_request_type_stats(query.message, query.from_user.id)
 
 
 def invalid_input_message(message):
@@ -263,11 +264,13 @@ def handle_url(message):
         invalid_input_message(message=message)
 
 
-@bot.message_handler(commands=['request_type_stats'], content_types=['text'])
-def get_request_type_stats(message):
-    bot.reply_to(message, f"request for the stats has recieved.")
+@bot.message_handler(commands=['request_type_stats'])
+def get_request_type_stats(message, user_id=None):
+    if not (user_id):
+        user_id = message.from_user.id
+    bot.send_message(message.chat.id, f"Request for the stats has recieved.")
     create_graph(message.chat.id, message.message_id,
-                 user_id=message.from_user.id)
+                 user_id=user_id)
 
 
 bot.infinity_polling()
